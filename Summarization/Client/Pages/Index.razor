@@ -1,0 +1,65 @@
+﻿@page "/"
+@using Summarization.Shared
+@inject HttpClient Http
+
+<MudGrid Justify="Justify.SpaceBetween">
+    <MudItem xs="12" sm="6" md="6" lg="6">
+        <MudTextField T="string" Label="Teks Sumber" Variant="Variant.Outlined" @bind-Text="sourceText" Lines="20" Immediate="true"/>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6" lg="6">
+        <MudTextField T="string" Label="Teks Ringkasan" Variant="Variant.Outlined" @bind-Text="summaryText" Lines="20" ReadOnly="true"/>
+        <MudOverlay Visible="isVisible" DarkBackground="true">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </MudOverlay>
+    </MudItem>
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="6" lg="6">
+
+        </MudItem>
+        <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
+            <MudGrid Class="d-flex align-center m-2">
+                <MudItem xs="6" sm="4" md="4" lg="4">
+
+                </MudItem>
+                <MudItem xs="6" sm="4" md="4" lg="4" Class="d-flex justify-end">
+                    <MudTooltip Placement="Placement.Bottom">
+                        <ChildContent>
+                            <MudSlider @bind-Value="summaryCountTarget" Min="@minSummaryCount" Max="@maxSummaryCount" Step="1" Color="Color.Primary"/>
+                        </ChildContent>
+                        <TooltipContent>
+                            <MudText Typo="Typo.body2">Jumlah Kalimat Ringkasan: @summaryCountTarget.ToString()</MudText>
+                        </TooltipContent>
+                    </MudTooltip>
+                </MudItem>
+                <MudItem xs="6" sm="4" md="4" lg="4" Class="d-flex justify-end">
+                    <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize"/>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+</MudGrid>
+
+@code{
+    bool isVisible = false;
+    string sourceText = "";
+    string summaryText = "";
+    int summaryCountTarget = 0;
+    int minSummaryCount = 0;
+    int maxSummaryCount = 10;
+    TextSummarization summarization;
+
+    async Task Summarize() {
+        isVisible = true;
+        
+        //do something
+
+        isVisible = false;
+    }
+
+    protected override async Task OnInitializedAsync() {
+        string stop_words_json = await Http.GetStringAsync("data/stop_words.json");
+        string base_words_json = await Http.GetStringAsync("data/base_words.json");
+        string document_frequencies_json = await Http.GetStringAsync("data/document_frequencies.json");
+        summarization = new TextSummarization(stop_words_json, base_words_json, document_frequencies_json);
+    }
+}
