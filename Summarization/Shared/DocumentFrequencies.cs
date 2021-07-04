@@ -4,21 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Summarization.Shared {
     public class DocumentFrequencies {
         private Dictionary<string, int> document_frequencies;
 
-        public DocumentFrequencies(string document_frequencies_json) {
-            this.document_frequencies = new Dictionary<string, int>();
-            JsonElement elements = JsonDocument.Parse(document_frequencies_json).RootElement;
-
-            for(int i = 0; i < elements.GetArrayLength(); i++) {
-                string word = elements[i].GetProperty("word").GetString();
-                int count = elements[i].GetProperty("count").GetInt32();
-
-                this.document_frequencies.Add(word, count);
-            }
+        public DocumentFrequencies(string document_frequencies_csv) {
+            this.document_frequencies = document_frequencies_csv.Split('\n').Skip(1).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Split(';')).ToDictionary(a => new string(a[0].Where(c => char.IsLetter(c)).ToArray()), a => Convert.ToInt32(a[1]));
         }
 
         public int GetDocumentFrequency(string word) {

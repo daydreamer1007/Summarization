@@ -10,13 +10,8 @@ namespace Summarization.Shared {
     public class StopWords {
         private HashSet<string> stop_words;
 
-        public StopWords(string stop_words_json) {
-            this.stop_words = new HashSet<string>();
-            JsonElement elements = JsonDocument.Parse(stop_words_json).RootElement;
-
-            for(int i = 0; i < elements.GetArrayLength(); i++) {
-                this.stop_words.Add(elements[i].GetProperty("word").GetString());
-            }
+        public StopWords(string stop_words_csv) {
+            this.stop_words = stop_words_csv.Split('\n').Skip(1).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => new string(s.Where(c => char.IsLetter(c)).ToArray())).ToHashSet<string>();
         }
 
         public bool IsStopWord(string word) {

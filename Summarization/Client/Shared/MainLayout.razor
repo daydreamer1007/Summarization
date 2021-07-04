@@ -6,24 +6,19 @@
 
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
         <MudSpacer />
-        <MudText Typo="Typo.h6">Peringkas Teks Ototmatis</MudText>
+        <MudText Typo="Typo.h6">Peringkas Berita Otomatis</MudText>
     </MudAppBar>
-    <MudDrawer @bind-Open="@open" Elevation="1">
-        @*<MudDrawerHeader>
-            <MudText Typo="Typo.h6">Peringkas Otomatis</MudText>
-        </MudDrawerHeader>*@
-        <MudNavMenu Class="mt-3">
-            <MudNavLink Href="" Match="NavLinkMatch.All" Icon="fas fa-file-alt"> Peringkas Teks</MudNavLink>
-            <MudNavLink Href="counter" Icon="fas fa-question"> Tentang Situs Ini</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
     <MudMainContent Class="pt-16 px-16">
         <MudContainer Class="mt-6">
             @Body
         </MudContainer>
     </MudMainContent>
+    <MudAppBar Elevation="1" Color="Color.Primary" Style="top: auto; bottom: 0" Dense="true" Fixed="true">
+        <MudGrid Justify="Justify.Center">
+            <MudText Style="font-size:small">Teknik Informatika Unpad (2021 - @DateTime.Now.Year) &copy; Ibrahim Yahya Nasution</MudText>
+        </MudGrid>
+    </MudAppBar>
 </MudLayout>
 
 @code{
@@ -53,26 +48,4 @@
             TextDisabled = "rgba(255,255,255, 0.2)"
         }
     };
-
-    bool open = false;
-
-    void ToggleDrawer() {
-        open = !open;
-    }
 }
-
-@*<div class="page">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
-
-        <div class="main">
-            <div class="top-row px-4">
-                <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-            </div>
-
-            <div class="content px-4">
-                @Body
-            </div>
-        </div>
-    </div>*@

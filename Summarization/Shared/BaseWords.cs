@@ -9,16 +9,8 @@ namespace Summarization.Shared {
     public class BaseWords {
         private Dictionary<string, string> base_words;
 
-        public BaseWords(string base_words_json) {
-            this.base_words = new Dictionary<string, string>();
-            JsonElement elements = JsonDocument.Parse(base_words_json).RootElement;
-
-            for(int i = 0; i < elements.GetArrayLength(); i++) {
-                string word = elements.GetProperty("word").GetString();
-                string base_word = elements.GetProperty("base_word").GetString();
-
-                this.base_words.Add(word, base_word);
-            }
+        public BaseWords(string base_words_csv) {
+            this.base_words = base_words_csv.Split('\n').Where(s => !string.IsNullOrWhiteSpace(s)).Skip(1).Select(s => s.Split(';')).ToDictionary(a => new string(a[0].Where(c => char.IsLetter(c)).ToArray()), a => new string(a[1].Where(c => char.IsLetter(c)).ToArray()));
         }
 
         public string GetBaseWord(string word) {
