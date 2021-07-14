@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Summarization.Shared {
     public class TextSummarization {
@@ -89,10 +88,6 @@ namespace Summarization.Shared {
                         this.words_count[s] += 1;
                     }
                 }
-            }
-
-            foreach(string s in this.words_count.Keys) {
-                Console.WriteLine(s + " => " + this.words_count[s]);
             }
         }
 
