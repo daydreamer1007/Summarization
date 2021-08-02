@@ -149,7 +149,7 @@ namespace Summarization.Shared {
                 double sum_at_col_i = Enumerable.Range(0, this.sentences.Count).Sum(j => this.similarities[j][i]);
 
                 for(int j = 0; j < this.sentences.Count; j++) {
-                    this.similarities[j][i] = this.similarities[j][i] / (sum_at_col_i > 0 ? sum_at_col_i : 1); //+ 1e-7;
+                    this.similarities[j][i] = this.similarities[j][i] / (sum_at_col_i > 0 ? sum_at_col_i : 1);
                 }
             }
         }

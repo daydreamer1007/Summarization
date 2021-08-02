@@ -6,11 +6,11 @@
 
 <MudGrid Justify="Justify.SpaceBetween">
     <MudItem xs="12" sm="6" md="6" lg="6">
-        <MudTextField T="string" Label="Teks Sumber" Variant="Variant.Outlined" @bind-Text="sourceText" Lines="20" Immediate="true" DisableUnderLine="true" />
+        <MudTextField T="string" Label="Teks Sumber" Variant="Variant.Filled" @bind-Text="source_text" Lines="20" Immediate="true" DisableUnderLine="true" Style="background-color:white;"/>
     </MudItem>
     <MudItem xs="12" sm="6" md="6" lg="6">
-        <MudTextField T="string" Label="Teks Ringkasan" Variant="Variant.Outlined" @bind-Text="summaryText" Lines="20" ReadOnly="true" Immediate="true"  DisableUnderLine="true" Style="text-align:justify"/>
-        <MudOverlay @bind-Visible="isVisible" DarkBackground="true" >
+        <MudTextField T="string" Label="Teks Ringkasan" Variant="Variant.Filled" @bind-Text="summary_text" Lines="20" ReadOnly="true" Immediate="true"  DisableUnderLine="true" Style="background-color:white;"/>
+        <MudOverlay @bind-Visible="is_visible" DarkBackground="true" >
             <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
         </MudOverlay>
     </MudItem>
@@ -18,21 +18,21 @@
         <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
             <MudGrid Class="d-flex align-center m-2">
                 <MudItem xs="12" sm="12" md="12" lg="12" Class="d-flex justify-end">
-                    <InputFile id="fileInput" OnChange="UploadText" hidden accept=".txt" />
-                    <MudFab HtmlTag="label" Color="Color.Primary" Icon="@Icons.Filled.AttachFile" for="fileInput" />
+                    <InputFile id="fileInput" OnChange="UploadText" hidden accept=".txt"/>
+                    <MudFab HtmlTag="label" Color="Color.Primary" Icon="@Icons.Filled.AttachFile" for="fileInput"/>
                 </MudItem>
             </MudGrid>
         </MudItem>
         <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
             <MudGrid Class="d-flex align-center m-2">
                 <MudItem xs="6" sm="5" md="5" lg="5">
-                    <MudSlider @bind-Value="compression" Min="0" Max="100" Step="1" Color="Color.Primary" Class="m"/>
+                    <MudSlider @bind-Value="compression" Min="0" Max="100" Step="1" Color="Color.Primary"/>
                 </MudItem>
                 <MudItem xs="6" sm="3" md="3" lg="3">
                     <MudText Typo="Typo.body2">Tingkat Kompresi Ringkasan: @compression.ToString()%</MudText>
                 </MudItem>
                 <MudItem xs="12" sm="4" md="4" lg="4" Class="d-flex justify-end">
-                    <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize" />
+                    <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize"/>
                 </MudItem>
             </MudGrid>
         </MudItem>
@@ -40,46 +40,47 @@
 </MudGrid>
 
 @code{
-    bool isVisible = false;
-    string sourceText = "";
+    bool is_visible = false;
+    string source_text = "";
     string old_source_text = "";
-    string summaryText = "";
+    string summary_text = "";
     int compression = 50;
     TextSummarization summarization;
 
     private async Task UploadText(InputFileChangeEventArgs e) {
-        isVisible = true;
-        IBrowserFile file = e.File;
-        StreamReader sr = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
-        Console.WriteLine("Reading File Stream");
-        sourceText = await sr.ReadToEndAsync();
-        Console.WriteLine(sourceText);
-        isVisible = false;
+        if(e.File.Name.EndsWith(".txt")) {
+            summary_text = "";
+            is_visible = true;
+            IBrowserFile file = e.File;
+            StreamReader sr = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
+            source_text = await sr.ReadToEndAsync();
+            is_visible = false;
+        }
     }
 
     private async Task Summarize() {
-        isVisible = true;
+        is_visible = true;
         await Task.Delay(1);
 
-        if(old_source_text != sourceText) {
-            summarization.Summarize(sourceText);
+        if(old_source_text != source_text) {
+            summarization.Summarize(source_text);
         }
-        
-        summaryText = summarization.GetSummary(compression);
-        old_source_text = sourceText;
-        isVisible = false;
+
+        summary_text = summarization.GetSummary(compression);
+        old_source_text = source_text;
+        is_visible = false;
 
         await Task.Delay(1);
     }
 
     protected override async Task OnInitializedAsync() {
-        isVisible = true;
+        is_visible = true;
 
         string stop_words_csv = await Http.GetStringAsync("data/stop_words.csv");
         string base_words_csv = await Http.GetStringAsync("data/base_words.csv");
         string document_frequencies_csv = await Http.GetStringAsync("data/document_frequencies.csv");
         summarization =  new TextSummarization(stop_words_csv, base_words_csv, document_frequencies_csv);
 
-        isVisible = false;
+        is_visible = false;
     }
 }
