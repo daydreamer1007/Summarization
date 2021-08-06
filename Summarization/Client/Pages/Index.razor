@@ -1,65 +1,420 @@
 ﻿@page "/"
 @using Summarization.Shared
-@using System.IO; 
-@using System.Text; 
+@using System.IO;
+@using System.Text;
 @inject HttpClient Http
 
-<MudGrid Justify="Justify.SpaceBetween">
+<MudGrid Class="d-flex align-center" Justify="Justify.SpaceBetween">
     <MudItem xs="12" sm="6" md="6" lg="6">
-        <MudTextField T="string" Label="Teks Sumber" Variant="Variant.Filled" @bind-Text="source_text" Lines="20" Immediate="true" DisableUnderLine="true" Style="background-color:white;"/>
+        <MudRadioGroup T="bool" SelectedOption="@use_evaluator_news" SelectedOptionChanged="@((bool b) => NewsModeChanged(b))">
+            <MudRadio T="bool" Option="true" Color="Color.Primary">Berita Evaluator</MudRadio>
+            <MudRadio T="bool" Option="false" Color="Color.Primary">Berita Lain</MudRadio>
+        </MudRadioGroup>
     </MudItem>
     <MudItem xs="12" sm="6" md="6" lg="6">
-        <MudTextField T="string" Label="Teks Ringkasan" Variant="Variant.Filled" @bind-Text="summary_text" Lines="20" ReadOnly="true" Immediate="true"  DisableUnderLine="true" Style="background-color:white;"/>
-        <MudOverlay @bind-Visible="is_visible" DarkBackground="true" >
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true"/>
+        @if(use_evaluator_news) {
+            <MudSelect T="int" Variant="Variant.Outlined" Strict="true" Label="Berita" ValueChanged="@((int n) => SelectedEvaluatorChanged(n))" Style="background-color: white;">
+                <MudSelectItem T="int" Value="1">D1. Pakar Unpad: Aset Kripto Jangan Digunakan untuk Transaksi</MudSelectItem>
+                <MudSelectItem T="int" Value="2">D2. Vaksinasi kepada Mahasiswa akan Dimulai 5 Juli</MudSelectItem>
+                <MudSelectItem T="int" Value="3">D3. KKN Virtual Unpad Berikan Kemampuan Manajerial Mahasiswa Lewat Teknologi</MudSelectItem>
+                <MudSelectItem T="int" Value="4">D4. Pemerintah Dukung Rencana Pembangunan RSPTN Unpad dengan Skema KPBU</MudSelectItem>
+                <MudSelectItem T="int" Value="5">D5. Sebanyak 26 Ribu Peserta SMUP Sarjana Jalur Mandiri Ikuti Ujian Daring</MudSelectItem>
+                <MudSelectItem T="int" Value="6">D6. Pakar Komunikasi Unpad: Media Sosial Hancurkan Nilai Kemanusiaan</MudSelectItem>
+                <MudSelectItem T="int" Value="7">D7. Karya Ilmiah Mahasiswa FTIP Unpad Raih Juara I di UTM, Malaysia</MudSelectItem>
+                <MudSelectItem T="int" Value="8">D8. Unpad Perkuat Kerja Sama dengan Yayasan Rumah Zakat Indonesia</MudSelectItem>
+                <MudSelectItem T="int" Value="9">D9. Presiden Jokowi Harapkan Lulusan Perguruan Tinggi Kuasai Kemampuan di Era Disrupsi</MudSelectItem>
+                <MudSelectItem T="int" Value="10">D10. Terapkan Ekosistem Kewirausahaan Inklusif, Unpad Raih Penghargaan Entrepreneurial Campus Award 2021</MudSelectItem>
+                <MudSelectItem T="int" Value="11">D11. Bupati Banyumas Tantang Warga Tak Percaya Covid Datang ke ICU</MudSelectItem>
+                <MudSelectItem T="int" Value="12">D12. Google, Facebook dan Twitter Ancam Hengkang dari Hong Kong</MudSelectItem>
+                <MudSelectItem T="int" Value="13">D13. Sutradara Film Superman Pertama, Richard Donner Meninggal </MudSelectItem>
+                <MudSelectItem T="int" Value="14">D14. Telkom Tegaskan Komitmen Wujudkan Kedaulatan Digital Negara</MudSelectItem>
+                <MudSelectItem T="int" Value="15">D15. Sentil ABS, Fadli Zon Minta Jokowi Ambil Alih Komando Pandemi</MudSelectItem>
+                <MudSelectItem T="int" Value="16">D16. Firli Sebut Virus Corona Rambah Semua Satuan Kerja KPK</MudSelectItem>
+                <MudSelectItem T="int" Value="17">D17. ESDM Kerek Harga Acuan Batu Bara ke Level Tertinggi 10 Tahun</MudSelectItem>
+                <MudSelectItem T="int" Value="18">D18. PLN Salurkan Rp4,8 M untuk Bantu Petani di 54 Lokasi</MudSelectItem>
+                <MudSelectItem T="int" Value="19">D19. Saudi Denda Orang Dekati Masjidil Haram Jelang Haji</MudSelectItem>
+                <MudSelectItem T="int" Value="20">D20. Pemerintah Sunat Proyeksi Pertumbuhan Jadi 3,7 Persen di 2021</MudSelectItem>
+            </MudSelect>
+        }
+    </MudItem>
+</MudGrid>
+<MudGrid Justify="Justify.SpaceBetween">
+    <MudItem xs="12" sm="6" md="6" lg="6">
+        <MudTextField T="string" Label="Teks Sumber" Variant="Variant.Filled" @bind-Text="source_text" Lines="20" ReadOnly="@use_evaluator_news" Immediate="true" DisableUnderLine="true" Style="background-color:white;" />
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6" lg="6">
+        <MudTextField T="string" Label="Teks Ringkasan" Variant="Variant.Filled" @bind-Text="summary_text" Lines="20" ReadOnly="true" Immediate="true" DisableUnderLine="true" Style="background-color: white;" />
+        <MudOverlay @bind-Visible="overlay_visible" DarkBackground="true">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
         </MudOverlay>
     </MudItem>
     <MudGrid>
         <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
             <MudGrid Class="d-flex align-center m-2">
                 <MudItem xs="12" sm="12" md="12" lg="12" Class="d-flex justify-end">
-                    <InputFile id="fileInput" OnChange="UploadText" hidden accept=".txt"/>
-                    <MudFab HtmlTag="label" Color="Color.Primary" Icon="@Icons.Filled.AttachFile" for="fileInput"/>
+                    @if(!use_evaluator_news) {
+                        <InputFile id="fileInput" OnChange="UploadText" hidden accept=".txt" />
+                        <MudFab HtmlTag="label" Color="Color.Primary" Icon="@Icons.Filled.AttachFile" for="fileInput" />
+                    }
                 </MudItem>
             </MudGrid>
         </MudItem>
         <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
             <MudGrid Class="d-flex align-center m-2">
                 <MudItem xs="6" sm="5" md="5" lg="5">
-                    <MudSlider @bind-Value="compression" Min="0" Max="100" Step="1" Color="Color.Primary"/>
+                    <MudSlider @bind-Value="compression" Min="0" Max="100" Step="1" Color="Color.Primary" />
                 </MudItem>
                 <MudItem xs="6" sm="3" md="3" lg="3">
                     <MudText Typo="Typo.body2">Tingkat Kompresi Ringkasan: @compression.ToString()%</MudText>
                 </MudItem>
                 <MudItem xs="12" sm="4" md="4" lg="4" Class="d-flex justify-end">
-                    <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize"/>
+                    <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize" />
                 </MudItem>
             </MudGrid>
         </MudItem>
     </MudGrid>
 </MudGrid>
+<MudGrid Class="d-flex align-center">
+    <MudItem sm="12" md="4" lg="4">
+        <MudSwitch @bind-Checked="@show_details" Label="Tunjukkan Detail Peringkasan" Color="Color.Primary"></MudSwitch>
+    </MudItem>
+</MudGrid>
+
+@if(show_details) {
+    if(summarization != null) {
+        if(summarization.sentences != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top:30px; padding-bottom:20px;">Hasil <i>Sentence Tokenization</i> Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">No</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Kalimat</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(int i = 0; i < summarization.sentences.Count; i++) {
+                        <tr>
+                            <td valign="middle" style="text-align: center;">S@(i + 1)</td>
+                            <td valign="middle" style="text-align: justify;">@summarization.sentences[i]</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        if(summarization.prepared_sentences != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Hasil <i>Case Folding</i> dan <i>Cleaning</i> Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">No</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Kalimat</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(int i = 0; i < summarization.prepared_sentences.Count; i++) {
+                        <tr>
+                            <td valign="middle" style="text-align: center;">S@(i + 1)</td>
+                            <td valign="middle" style="text-align: justify;">@summarization.prepared_sentences[i]</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        if(summarization.words != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Hasil <i>Word Tokenization</i>, <i>Stop Words Removal</i> dan <i>Stemming</i> Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">No</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Kata-Kata</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(int i = 0; i < summarization.words.Count; i++) {
+                        <tr>
+                            <td valign="middle" style="text-align: center;">S@(i + 1)</td>
+                            <td valign="middle" style="text-align: justify;">@string.Join(", ", summarization.words[i])</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        if(summarization.tfidf_values != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Nilai <i>TF</i>, <i>IDF</i>, dan <i>TF-IDF</i> Kata-Kata Penyusun Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Kata</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;"><i>Count</i></td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;"><i>TF</i></td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;"><i>DF</i> Korpus</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;"><i>DF</i> Total</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;"><i>IDF</i></td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;"><i>TF-IDF</i></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int max_df = summarization.tfidf_values.Keys.Max(s => 1 + summarization.document_frequencies.GetDocumentFrequency(s));
+
+                        foreach(string s in summarization.tfidf_values.Keys) {
+                            int wc = summarization.words_count[s];
+                            string tf = Math.Round(summarization.tf_values[s], 5).ToString().Replace(".", ",");
+                            int df = summarization.document_frequencies.GetDocumentFrequency(s);
+                            string idf = Math.Round(summarization.idf_values[s], 5).ToString().Replace(".", ",");
+                            string tfidf = Math.Round(summarization.tfidf_values[s], 5).ToString().Replace(".", ",");
+
+                            <tr>
+                                <td valign="middle">@s</td>
+                                <td valign="middle" style="text-align: center;">@wc</td>
+                                <td valign="middle">Log(1 + @wc) = <b>@tf</b></td>
+                                <td valign="middle" style="text-align: center;">@df</td>
+                                <td valign="middle" style="text-align: center;">@(1 + df)</td>
+                                <td valign="middle">Log(@max_df / @(1 + df)) = <b>@idf</b></td>
+                                <td valign="middle">@tf × @idf = <b>@tfidf</b></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        if(summarization.tfidf_scores != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Skor <i>TF-IDF</i> Kalimat Penyusun Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; left: 0; z-index: 3; position: sticky; background-color: white;">Kata</td>
+
+                        @for(int i = 0; i < summarization.sentences.Count; i++) {
+                            <td valign="middle" style="text-align: center; font-weight: bold; top: 0; z-index: 1; position: sticky; background-color: white;">S@(i + 1)</td>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(string s in summarization.words_count.Keys) {
+                        <tr>
+                            <td valign="middle" style="left: 0; z-index: 2; position: sticky; background-color: white;">@s</td>
+
+                            @for(int i = 0; i < summarization.sentences.Count; i++) {
+                                int count = summarization.words[i].Count(st => st == s);
+                                string tfidf = Math.Round(summarization.tfidf_values[s], 5).ToString().Replace(".", ",");
+
+                                <td valign="middle">@count × @tfidf</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+                <tfoot style="padding-bottom: 0;">
+                    <tr>
+                        <td valign="middle" style="text-align: right; font-weight: bold; bottom: 0; left: 0; z-index: 3; position: sticky; background-color: white;">Skor <i>TF-IDF</i></td>
+
+                        @for(int i = 0; i < summarization.sentences.Count; i++) {
+                            string score = Math.Round(summarization.tfidf_scores[i], 5).ToString().Replace(".", ".");
+
+                            <td valign="middle" style="text-align: center; font-weight: bold; bottom: 0; z-index: 1; position: sticky; background-color: white; ">@score</td>
+                        }
+                    </tr>
+                </tfoot>
+            </MudSimpleTable>
+        }
+
+        if(summarization.similarities != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;"><i>Normalized Similarities Matrix</i> Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; left: 0; z-index: 3; position: sticky; background-color: white;">No</td>
+
+                        @for(int i = 0; i < summarization.sentences.Count; i++) {
+                            <td valign="middle" style="text-align: center; font-weight: bold; top: 0; z-index: 1; position: sticky; background-color: white;">S@(i + 1)</td>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(int i = 0; i < summarization.sentences.Count; i++) {
+                        <tr>
+                            <td valign="middle" style="text-align: center; left: 0; z-index: 2; position: sticky; background-color: white;">S@(i + 1)</td>
+
+                            @for(int j = 0; j < summarization.sentences.Count; j++) {
+                                if(i == j) {
+                                    <td style="background-color: black;"></td>
+                                }
+                                else {
+                                    string similarity = Math.Round(summarization.similarities[i][j], 5).ToString().Replace(".", ",");
+
+                                    <td valign="middle">@similarity</td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        if(summarization.textrank_scores != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Skor <i>TextRank</i> Kalimat Penyusun Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">No</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Skor <i>TextRank</i></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(int i = 0; i < summarization.sentences.Count; i++) {
+                        string score = Math.Round(summarization.textrank_scores[i], 5).ToString().Replace(".", ",");
+
+                        <tr>
+                            <td valign="middle" style="text-align: center;">S@(i + 1)</td>
+                            <td valign="middle">@score</td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        if(summarization.final_scores != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Skor Akhir Kalimat Penyusun Berita</MudText>
+
+            <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
+                <thead>
+                    <tr>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">No</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Skor <i>TF-IDF</i></td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Skor <i>TextRank</i></td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; position: sticky; background-color: white;">Skor <i>Akhir</i></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int count = Convert.ToInt32(Math.Floor(Convert.ToDouble(summarization.sentences.Count) * Convert.ToDouble(100 - compression) / 100.0));
+                        HashSet<int> summary_indices = summarization.ordered_indices.Take(count).ToHashSet();
+
+                        for(int i = 0; i < summarization.sentences.Count; i++) {
+                            string tfidf = Math.Round(summarization.tfidf_scores[i], 5).ToString().Replace(".", ",");
+                            string tr = Math.Round(summarization.textrank_scores[i], 5).ToString().Replace(".", ",");
+                            string score = Math.Round(summarization.final_scores[i], 5).ToString().Replace(".", ",");
+                            string style_string = summary_indices.Contains(i) ? "background-color: #594ae2ff; color: white;" : "";
+
+                            <tr style="@style_string">
+                                <td valign="middle" style="text-align: center;">S@(i + 1)</td>
+                                <td valign="middle">@tfidf</td>
+                                <td valign="middle">@tr</td>
+                                <td valign="middle">@tfidf × @tr = <b>@score</b></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+
+        @if(use_evaluator_news && summarization.ordered_indices != null) {
+            <MudText Align="Align.Center" Typo="Typo.h5" Style="padding-top: 30px; padding-bottom: 20px;">Evaluasi Ringkasan Berita</MudText>
+
+            <MudSimpleTable Hover="true" Bordered="true" Outlined="true" Dense="true">
+                <tbody>
+                    @{
+                        int count = Convert.ToInt32(Math.Floor(Convert.ToDouble(summarization.sentences.Count) * Convert.ToDouble(100 - compression) / 100.0));
+                        List<int> summary_indices = summarization.ordered_indices.Take(count).Select(n => n + 1).OrderBy(n => n).ToList();
+                        List<int> reference_indices = summarization.references[selected_evaluator].ToList();
+                        List<int> tp = summary_indices.Where(n => reference_indices.Contains(n)).Select(n => n).ToList();
+                        int si_count = summary_indices.Count;
+                        int ri_count = reference_indices.Count;
+                        int tp_count = tp.Count;
+                        double precision = Math.Round(Convert.ToDouble(tp.Count) / Convert.ToDouble(si_count), 5);
+                        double recall = Math.Round(Convert.ToDouble(tp.Count) / Convert.ToDouble(ri_count), 5);
+                        double f_score = Math.Round(2 * precision * recall / (precision + recall), 5);
+                        string p_string = precision.ToString().Replace(".", ",");
+                        string r_string = recall.ToString().Replace(".", ",");
+                        string f_string = f_score.ToString().Replace(".", ",");
+
+                        <tr>
+                            <td valign="middle">Indeks Kalimat Penyusun Ringkasan Hasil</td>
+                            <td valign="middle">@string.Join(", ", summary_indices) (<b>Jumlah: @si_count</b>)</td>
+                        </tr>
+                        <tr>
+                            <td valign="middle">Indeks Kalimat Penyusun Ringkasan Penguji</td>
+                            <td valign="middle">@string.Join(", ", reference_indices) (<b>Jumlah: @ri_count</b>)</td>
+                        </tr>
+                        <tr>
+                            <td valign="middle"><i>True Positives</i></td>
+                            <td valign="middle">@string.Join(", ", tp) (<b>Jumlah: @tp_count</b>)</td>
+                        </tr>
+                        <tr>
+                            <td valign="middle"><i>Precision</i></td>
+                            <td valign="middle">@tp_count / @si_count = <b>@p_string</b></td>
+                        </tr>
+                        <tr>
+                            <td valign="middle"><i>Recall</i></td>
+                            <td valign="middle">@tp_count / @si_count = <b>@r_string</b></td>
+                        </tr>
+                        <tr>
+                            <td valign="middle"><i>F-Score</i></td>
+                            <td valign="middle">2 * @p_string * @r_string / (@p_string + @r_string) = <b>@f_string</b></td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
+        }
+    }
+}
 
 @code{
-    bool is_visible = false;
+    bool overlay_visible = false;
+    bool use_evaluator_news = true;
+    int selected_evaluator = 0;
     string source_text = "";
     string old_source_text = "";
     string summary_text = "";
     int compression = 50;
+    bool show_details = false;
     TextSummarization summarization;
+
+    private void NewsModeChanged(bool selected_option) {
+        use_evaluator_news = selected_option;
+        source_text = "";
+        old_source_text = "";
+        summary_text = "";
+        summarization.Clear();
+    }
+
+    private async Task SelectedEvaluatorChanged(int selected_value) {
+        overlay_visible = true;
+        await Task.Delay(1);
+        selected_evaluator = selected_value;
+        source_text = await Http.GetStringAsync("data/D" + selected_evaluator + ".txt");
+        summary_text = "";
+        summarization.Clear();
+        overlay_visible = false;
+        await Task.Delay(1);
+    }
 
     private async Task UploadText(InputFileChangeEventArgs e) {
         if(e.File.Name.EndsWith(".txt")) {
             summary_text = "";
-            is_visible = true;
+            overlay_visible = true;
             IBrowserFile file = e.File;
             StreamReader sr = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
             source_text = await sr.ReadToEndAsync();
-            is_visible = false;
+            old_source_text = "";
+            summarization.Clear();
+            overlay_visible = false;
         }
     }
 
     private async Task Summarize() {
-        is_visible = true;
+        overlay_visible = true;
         await Task.Delay(1);
 
         if(old_source_text != source_text) {
@@ -68,19 +423,19 @@
 
         summary_text = summarization.GetSummary(compression);
         old_source_text = source_text;
-        is_visible = false;
+        overlay_visible = false;
 
         await Task.Delay(1);
     }
 
     protected override async Task OnInitializedAsync() {
-        is_visible = true;
+        overlay_visible = true;
 
         string stop_words_csv = await Http.GetStringAsync("data/stop_words.csv");
         string base_words_csv = await Http.GetStringAsync("data/base_words.csv");
         string document_frequencies_csv = await Http.GetStringAsync("data/document_frequencies.csv");
-        summarization =  new TextSummarization(stop_words_csv, base_words_csv, document_frequencies_csv);
+        summarization = new TextSummarization(stop_words_csv, base_words_csv, document_frequencies_csv);
 
-        is_visible = false;
+        overlay_visible = false;
     }
 }

@@ -7,19 +7,41 @@ namespace Summarization.Shared {
     public class TextSummarization {
         private StopWords stop_words;
         private BaseWords base_words;
-        private DocumentFrequencies document_frequencies;
-        private List<string> sentences;
-        private List<string> prepared_sentences;
-        private List<List<string>> words;
-        private Dictionary<string, int> words_count;
-        private Dictionary<string, double> tf_values;
-        private Dictionary<string, double> idf_values;
-        private Dictionary<string, double> tfidf_values;
-        private List<double> tfidf_scores;
-        private List<List<double>> similarities;
-        private List<double> textrank_scores;
-        private List<double> final_scores;
-        private List<int> ordered_indices;
+        public DocumentFrequencies document_frequencies;
+        public List<string> sentences;
+        public List<string> prepared_sentences;
+        public List<List<string>> words;
+        public Dictionary<string, int> words_count;
+        public Dictionary<string, double> tf_values;
+        public Dictionary<string, double> idf_values;
+        public Dictionary<string, double> tfidf_values;
+        public List<double> tfidf_scores;
+        public List<List<double>> similarities;
+        public List<double> textrank_scores;
+        public List<double> final_scores;
+        public List<int> ordered_indices;
+        public List<List<int>> references = new List<List<int>>() {
+            new List<int>(){ 1, 3, 5, 10, 11, 13, 15, 17, 18 },
+            new List<int>(){ 1, 2, 3, 6, 8, 11, 13, 14, 15, 16, 17, 18 },
+            new List<int>(){ 1,2, 6, 7, 15, 17, 20 },
+            new List<int>(){ 1, 3, 4, 9, 11, 14, 16, 17, 18 },
+            new List<int>(){ 1, 3, 5, 6, 8, 11, 15 },
+            new List<int>(){ 1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 15, 18 },
+            new List<int>(){ 1, 2, 3, 4, 6, 7, 10, 12, 14 },
+            new List<int>(){ 1, 3, 6, 7, 8 },
+            new List<int>(){ 1, 2, 4, 5, 7, 8, 10, 12, 13, 14, 17, 19, 20 },
+            new List<int>(){ 1, 3, 4, 8, 12, 13, 14, 15, 16 },
+            new List<int>(){ 1, 2, 5, 6, 7, 15, 16 },
+            new List<int>(){ 1, 2, 3, 4, 7, 8, 17 },
+            new List<int>(){ 1, 2, 6, 12, 14 },
+            new List<int>(){ 1, 2, 3, 4, 5, 6, 8, 9, 12, 14, 17, 18, 19, 20, 22 },
+            new List<int>(){ 1, 2, 6, 7, 9, 12 },
+            new List<int>(){ 1, 2, 3, 6, 8, 9, 12, 13, 14, 15 },
+            new List<int>(){ 1, 2, 4, 7, 9, 10, 11, 12, 13 },
+            new List<int>(){ 1, 2, 4, 5, 7, 8, 10, 11, 13 },
+            new List<int>(){ 1, 2, 3, 5, 7, 9, 10, 12, 14, 15 },
+            new List<int>(){ 1, 2, 6, 7, 8, 9, 11 }
+        };
 
         public TextSummarization(string stop_words_csv, string base_words_csv, string document_frequencies_csv) {
             this.stop_words = new StopWords(stop_words_csv);
@@ -205,6 +227,21 @@ namespace Summarization.Shared {
             int count = Convert.ToInt32(Math.Floor(Convert.ToDouble(this.sentences.Count) * Convert.ToDouble(100 - compression) / 100.0));
 
             return this.sentences == null ? "" : string.Join("\n\n", ordered_indices.Take(count).OrderBy(n => n).Select(n => sentences[n]));
+        }
+
+        public void Clear() {
+            this.sentences = null;
+            this.prepared_sentences = null;
+            this.words = null;
+            this.words_count = null;
+            this.tf_values = null;
+            this.idf_values = null;
+            this.tfidf_values = null;
+            this.tfidf_scores = null;
+            this.similarities = null;
+            this.textrank_scores = null;
+            this.final_scores = null;
+            this.ordered_indices = null;
         }
     }
 }

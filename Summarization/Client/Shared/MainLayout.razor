@@ -1,20 +1,20 @@
 ﻿@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="defaultTheme"/>
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
-        <MudSpacer />
+        <MudSpacer/>
         <MudText Typo="Typo.h6">Peringkas Berita Otomatis</MudText>
     </MudAppBar>
-    <MudMainContent Class="pt-16 px-16">
+    <MudMainContent Class="pt-16 px-16" Style="padding-bottom:100px;">
         <MudContainer Class="mt-6">
             @Body
         </MudContainer>
     </MudMainContent>
-    <MudAppBar Elevation="1" Color="Color.Primary" Style="top: auto; bottom: 0" Dense="true" Fixed="true">
+    <MudAppBar Elevation="1" Color="Color.Primary" Style="top: auto; bottom: 0;" Dense="true" Fixed="true">
         <MudGrid Justify="Justify.Center">
             <MudText Style="font-size:small">Teknik Informatika Universitas Padjadjaran (2021 - @DateTime.Now.Year) &copy; Ibrahim Yahya Nasution</MudText>
         </MudGrid>
