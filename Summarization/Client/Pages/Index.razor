@@ -4,6 +4,9 @@
 @using System.Text;
 @inject HttpClient Http
 
+<MudOverlay @bind-Visible="overlay_visible" DarkBackground="true">
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+</MudOverlay>
 <MudGrid Class="d-flex align-center" Justify="Justify.SpaceBetween">
     <MudItem xs="12" sm="6" md="6" lg="6">
         <MudRadioGroup T="bool" SelectedOption="@use_evaluator_news" SelectedOptionChanged="@((bool b) => NewsModeChanged(b))">
@@ -38,47 +41,47 @@
         }
     </MudItem>
 </MudGrid>
-<MudGrid Justify="Justify.SpaceBetween">
+<MudGrid Class="d-flex align-center" Justify="Justify.SpaceBetween">
     <MudItem xs="12" sm="6" md="6" lg="6">
         <MudTextField T="string" Label="Teks Sumber" Variant="Variant.Filled" @bind-Text="source_text" Lines="20" ReadOnly="@use_evaluator_news" Immediate="true" DisableUnderLine="true" Style="background-color:white;" />
     </MudItem>
     <MudItem xs="12" sm="6" md="6" lg="6">
         <MudTextField T="string" Label="Teks Ringkasan" Variant="Variant.Filled" @bind-Text="summary_text" Lines="20" ReadOnly="true" Immediate="true" DisableUnderLine="true" Style="background-color: white;" />
-        <MudOverlay @bind-Visible="overlay_visible" DarkBackground="true">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-        </MudOverlay>
-    </MudItem>
-    <MudGrid>
-        <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
-            <MudGrid Class="d-flex align-center m-2">
-                <MudItem xs="12" sm="12" md="12" lg="12" Class="d-flex justify-end">
-                    @if(!use_evaluator_news) {
-                        <InputFile id="fileInput" OnChange="UploadText" hidden accept=".txt" />
-                        <MudFab HtmlTag="label" Color="Color.Primary" Icon="@Icons.Filled.AttachFile" for="fileInput" />
-                    }
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
-            <MudGrid Class="d-flex align-center m-2">
-                <MudItem xs="6" sm="5" md="5" lg="5">
-                    <MudSlider @bind-Value="compression" Min="0" Max="100" Step="1" Color="Color.Primary" />
-                </MudItem>
-                <MudItem xs="6" sm="3" md="3" lg="3">
-                    <MudText Typo="Typo.body2">Tingkat Kompresi Ringkasan: @compression.ToString()%</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="4" md="4" lg="4" Class="d-flex justify-end">
-                    <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize" />
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-    </MudGrid>
-</MudGrid>
-<MudGrid Class="d-flex align-center">
-    <MudItem sm="12" md="4" lg="4">
-        <MudSwitch @bind-Checked="@show_details" Label="Tunjukkan Detail Peringkasan" Color="Color.Primary"></MudSwitch>
     </MudItem>
 </MudGrid>
+
+@if(summarization != null && summarization.tfidf_values != null) {
+    string keywords = string.Join(", ", summarization.tfidf_values.OrderByDescending(p => p.Value).Take(5).Select(p => p.Key));
+
+    <MudText Typo="Typo.body1" Style="padding-top: 20px; padding-bottom: 20px;"><b>Kata Kunci</b>: @keywords</MudText>
+}
+
+<MudGrid Class="d-flex align-center" Justify="Justify.SpaceBetween">
+    <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
+        <MudGrid Class="d-flex align-center m-2">
+            <MudItem xs="12" sm="12" md="12" lg="12" Class="d-flex justify-end">
+                @if(!use_evaluator_news) {
+                    <InputFile id="fileInput" OnChange="UploadText" hidden accept=".txt" />
+                    <MudFab HtmlTag="label" Color="Color.Primary" Icon="@Icons.Filled.AttachFile" for="fileInput" />
+                }
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="6" lg="6" Class="d-flex align-stretch">
+        <MudGrid Class="d-flex align-center m-2">
+            <MudItem xs="6" sm="5" md="5" lg="5">
+                <MudSlider @bind-Value="compression" Min="0" Max="100" Step="1" Color="Color.Primary" />
+            </MudItem>
+            <MudItem xs="6" sm="3" md="3" lg="3">
+                <MudText Typo="Typo.body2">Tingkat Kompresi Ringkasan: @compression.ToString()%</MudText>
+            </MudItem>
+            <MudItem xs="12" sm="4" md="4" lg="4" Class="d-flex justify-end">
+                <MudFab Icon="fas fa-cut" Label="Ringkas" Color="Color.Primary" @onclick="Summarize" />
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+<MudSwitch @bind-Checked="@show_details" Label="Tunjukkan Detail Peringkasan" Color="Color.Primary"></MudSwitch>
 
 @if(show_details) {
     if(summarization != null) {
@@ -233,7 +236,7 @@
             <MudSimpleTable Class="overflow-auto" Hover="true" Bordered="true" Outlined="true" Dense="true" Style="max-height: 500px;">
                 <thead>
                     <tr>
-                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; left: 0; z-index: 3; position: sticky; background-color: white;">No</td>
+                        <td valign="middle" style="text-align: center; font-weight: bold; top: 0; left: 0; z-index: 3; position: sticky; background-color: white;"><i>Similarity</i></td>
 
                         @for(int i = 0; i < summarization.sentences.Count; i++) {
                             <td valign="middle" style="text-align: center; font-weight: bold; top: 0; z-index: 1; position: sticky; background-color: white;">S@(i + 1)</td>
@@ -243,7 +246,7 @@
                 <tbody>
                     @for(int i = 0; i < summarization.sentences.Count; i++) {
                         <tr>
-                            <td valign="middle" style="text-align: center; left: 0; z-index: 2; position: sticky; background-color: white;">S@(i + 1)</td>
+                            <td valign="middle" style="text-align: center; font-weight: bold; left: 0; z-index: 2; position: sticky; background-color: white;">S@(i + 1)</td>
 
                             @for(int j = 0; j < summarization.sentences.Count; j++) {
                                 if(i == j) {
@@ -332,9 +335,9 @@
                         int si_count = summary_indices.Count;
                         int ri_count = reference_indices.Count;
                         int tp_count = tp.Count;
-                        double precision = Math.Round(Convert.ToDouble(tp.Count) / Convert.ToDouble(si_count), 5);
+                        double precision = Math.Round(Convert.ToDouble(tp.Count) / (si_count > 0 ? Convert.ToDouble(si_count) : 1), 5);
                         double recall = Math.Round(Convert.ToDouble(tp.Count) / Convert.ToDouble(ri_count), 5);
-                        double f_score = Math.Round(2 * precision * recall / (precision + recall), 5);
+                        double f_score = Math.Round(2 * precision * recall / (precision + recall > 0 ? precision + recall : 1), 5);
                         string p_string = precision.ToString().Replace(".", ",");
                         string r_string = recall.ToString().Replace(".", ",");
                         string f_string = f_score.ToString().Replace(".", ",");
